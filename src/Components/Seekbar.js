@@ -15,12 +15,13 @@ SeekBar.schema = {
   currState: { type: Types.String, default: "none" },
   prevState: { type: Types.String, default: "none" },
   intersectX: { type: Types.Number }, // used to reverse calculate position
-  position: { type: Types.Number, default: 0 }, // position between start and end
-  min: { type: Types.Number, default: 0 }, // start point
-  max: { type: Types.Number, default: 1 }, // end point
+  position: { type: Types.Number }, // position between start and end
+  min: { type: Types.Number, default: -1 }, // start point
+  max: { type: Types.Number, default: -1 }, // end point
   onInteract: { type: Types.Ref, default: (value) => {} },
   onChange: { type: Types.Ref, default: (value) => {} },
-  changeOnRelease: { type: Types.Boolean, default: true },
+  onVideoUpdate: { type: Types.Ref, default: () => {} },
+  changeOnRelease: { type: Types.Boolean, default: false },
   bar: { type: Types.Ref }, // references seek bar mesh
   handle: { type: Types.Ref }, // references seek handle mesh
 };
@@ -29,6 +30,14 @@ class SeekSystem extends System {
   execute(/* delta, time */) {
     this.queries.seekbars.results.forEach((entity) => {
       const seek = entity.getMutableComponent(SeekBar);
+
+      if ((!seek.min || seek.min == -1) && (!seek.max || seek.max == -1)) {
+        seek.bar.updateMatrixWorld();
+        seek.bar.geometry.computeBoundingBox();
+        const bounds = seek.bar.geometry.boundingBox;
+        seek.min = bounds.min.x;
+        seek.max = bounds.max.x;
+      }
       //seek.handle.position.set(seek.position)
       //   const seekbarMesh = entity.getComponent(Object3D).object;
       if (seek.currState == "none") {
@@ -37,33 +46,45 @@ class SeekSystem extends System {
         seek.bar.scale.set(1.1, 1.1, 1.1);
       }
       if (seek.currState == "pressed" && seek.prevState != "pressed") {
-        seek.bar.geometry.computeBoundingBox();
         seek.bar.updateMatrixWorld();
+        const bounds = seek.bar.geometry.boundingBox;
+        seek.min = bounds.min.x;
+        seek.max = bounds.max.x;
+        const x = seek.intersectX;
+        const clampedPoint = new Vector3();
+        bounds.clampPoint(new Vector3(x), clampedPoint);
+        seek.position = (clampedPoint.x - seek.min) / (seek.max - seek.min);
+        console.log(
+          `Original X: ${x}\nClamped X: ${
+            clampedPoint.x
+          }\nBounds min: ${JSON.stringify(
+            bounds.min
+          )}\nBounds max: ${JSON.stringify(bounds.max)}`
+        );
         seek.onInteract();
       }
-      if (seek.currState == "pressed" && !seek.changeOnRelease) {
+      if (seek.currState == "pressed") {
         // debounce this please
         const x = seek.intersectX;
-        const bounds = seek.bar.geometry.boundingBox;
         const clampedPoint = new Vector3();
-        // console.log(bounds.clampPoint(new Vector3(x), clampedPoint));
-        // console.log(
-        //   `Original X: ${x}\nClamped X: ${clampedPoint.x}\nBounds min: ${bounds.min}\nBounds max: ${bounds.max}`
-        // );
+        const bounds = seek.bar.geometry.boundingBox;
+        bounds.clampPoint(new Vector3(x), clampedPoint);
+        seek.position = (clampedPoint.x - seek.min) / (seek.max - seek.min);
 
-        seek.onChange(0); // calculate position then feed to this
-      } else if (
-        seek.prevState == "pressed" &&
-        seek.currState != "pressed" &&
-        seek.changeOnRelease
-      ) {
-        seek.onChange(0); // calculate position then feed to this
+        seek.handle.position.x = clampedPoint.x;
+        seek.bar.material.uniforms.fill.value = seek.position;
+        seek.onChange(seek.position); // calculate position then feed to this
+      } else {
+        seek.position = seek.onVideoUpdate();
+        seek.handle.position.x =
+          seek.position * (seek.max - seek.min) + seek.min;
+        seek.bar.material.uniforms.fill.value = seek.position;
       }
 
       // preserve prevState, clear currState
       // HandRaySystem will update currState
       seek.prevState = seek.currState;
-      //seek.currState = "none"; // should not automatically set to none
+      //   seek.currState = "none"; // should not automatically set to none
     });
   }
 }

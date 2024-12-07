@@ -294,30 +294,6 @@ function addButton(text, colour, action, xPos, yPos) {
 function addMenu() {
   scene.add(menuMesh);
   menuMesh.add(menuAnchorMesh);
-  menuMesh.add(seekBarMesh);
-  seekBarMesh.position.set(0, -0.25, 0);
-
-  const seekBarEntity = world.createEntity();
-  seekBarEntity.addComponent(Intersectable);
-  seekBarEntity.addComponent(Object3D, { object: seekBarMesh });
-  seekBarEntity.addComponent(SeekBar, {
-    onInteract: () => {
-      video.pause();
-    },
-    onChange: (value) => {
-      video.currentPosition = value;
-      video.play();
-    },
-    changeOnRelease: false,
-    handle: seekHandleMesh,
-    bar: seekBarMesh,
-  });
-
-  const seekHandleEntity = world.createEntity();
-  seekHandleEntity.addComponent(Intersectable);
-  seekHandleEntity.addComponent(Object3D, { object: seekHandleMesh });
-  seekHandleEntity.addComponent(ClampToObject, { object: seekBarMesh });
-  seekHandleEntity.addComponent(Draggable);
 
   const columns = 6;
   const colWidth = 0.24;
@@ -468,6 +444,34 @@ function addMenu() {
     return button;
   });
 
+  menuMesh.add(seekBarMesh);
+  seekBarMesh.position.set(0, -0.25, 0);
+  const seekBarEntity = world.createEntity();
+  seekBarEntity.addComponent(Intersectable);
+  seekBarEntity.addComponent(Object3D, { object: seekBarMesh });
+  seekBarEntity.addComponent(SeekBar, {
+    onInteract: () => {
+      video.pause();
+    },
+    onChange: (value) => {
+      currentTime = value * length;
+      seek();
+      video.play();
+    },
+    onVideoUpdate: () => {
+      return video.currentTime / video.duration;
+    },
+    changeOnRelease: false,
+    handle: seekHandleMesh,
+    bar: seekBarMesh,
+  });
+
+  menuChildren.push({
+    entity: seekBarEntity,
+    object: seekBarMesh,
+    intersectable: true,
+  });
+
   menuEntity = world.createEntity();
   menuEntity.addComponent(Intersectable);
   menuEntity.addComponent(OffsetFromCamera, { x: 0, y: 0, z: -1.4 });
@@ -594,6 +598,7 @@ function initControllers() {
     raycaster: controllerPointer1,
     pinched: false,
     attached: false,
+    paused: false,
     cursor: cursor1,
   };
   const controllerData2 = {
@@ -601,6 +606,7 @@ function initControllers() {
     raycaster: controllerPointer1,
     pinched: false,
     attached: false,
+    paused: false,
     cursor: cursor2,
   };
 

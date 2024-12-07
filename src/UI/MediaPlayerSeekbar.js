@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { roundedCornerShader } from "./RoundedCornerShaderv1";
 import { createText } from "three/addons/webxr/Text2D.js";
 const size = [1.2, 0.03];
-const seekBarGeometry = new THREE.PlaneGeometry(...size, 80, 80);
+const seekBarGeometry = new THREE.PlaneGeometry(...size, 1, 1);
 
 const seekBarMaterial = new THREE.ShaderMaterial({
   uniforms: {
@@ -51,7 +51,7 @@ const seekBarMaterial = new THREE.ShaderMaterial({
 const seekBarMesh = new THREE.Mesh(seekBarGeometry, seekBarMaterial);
 
 const handleSize = [0.1, 0.1];
-const seekHandleGeometry = new THREE.PlaneGeometry(...handleSize, 80, 80);
+const seekHandleGeometry = new THREE.PlaneGeometry(...handleSize, 1, 1);
 
 const seekHandleMaterial = new THREE.ShaderMaterial({
   uniforms: {
