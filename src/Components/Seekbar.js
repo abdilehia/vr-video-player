@@ -14,7 +14,7 @@ SeekBar.schema = {
   // button states: [none, hovered, pressed]
   currState: { type: Types.String, default: "none" },
   prevState: { type: Types.String, default: "none" },
-  intersectX: { type: Types.Number }, // used to reverse calculate position
+  intersect: { type: Types.Ref }, // used to reverse calculate position
   position: { type: Types.Number }, // position between start and end
   min: { type: Types.Number, default: -1 }, // start point
   max: { type: Types.Number, default: -1 }, // end point
@@ -46,32 +46,17 @@ class SeekSystem extends System {
         seek.bar.scale.set(1.1, 1.1, 1.1);
       }
       if (seek.currState == "pressed" && seek.prevState != "pressed") {
-        seek.bar.updateMatrixWorld();
         const bounds = seek.bar.geometry.boundingBox;
         seek.min = bounds.min.x;
         seek.max = bounds.max.x;
-        const x = seek.intersectX;
-        const clampedPoint = new Vector3();
-        bounds.clampPoint(new Vector3(x), clampedPoint);
-        seek.position = (clampedPoint.x - seek.min) / (seek.max - seek.min);
-        console.log(
-          `Original X: ${x}\nClamped X: ${
-            clampedPoint.x
-          }\nBounds min: ${JSON.stringify(
-            bounds.min
-          )}\nBounds max: ${JSON.stringify(bounds.max)}`
-        );
         seek.onInteract();
       }
       if (seek.currState == "pressed") {
         // debounce this please
-        const x = seek.intersectX;
-        const clampedPoint = new Vector3();
-        const bounds = seek.bar.geometry.boundingBox;
-        bounds.clampPoint(new Vector3(x), clampedPoint);
-        seek.position = (clampedPoint.x - seek.min) / (seek.max - seek.min);
+        if (seek.intersect == null) return;
+        seek.position = (seek.intersect.x - seek.min) / (seek.max - seek.min);
 
-        seek.handle.position.x = clampedPoint.x;
+        seek.handle.position.x = seek.intersect.x;
         seek.bar.material.uniforms.fill.value = seek.position;
         seek.onChange(seek.position); // calculate position then feed to this
       } else {

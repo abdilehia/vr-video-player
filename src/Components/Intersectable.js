@@ -1,5 +1,5 @@
 import { System, TagComponent } from "three/addons/libs/ecsy.module.js";
-import { Box3, Vector3, Raycaster } from "three";
+import { Box3, Vector3, Raycaster, Ray } from "three";
 import Object3D from "./Object3D";
 import { Button } from "./Buttons";
 import { ClampToObject, Draggable } from "./Draggable";
@@ -123,11 +123,25 @@ class HandRaySystem extends System {
           const seekbar =
             this.intersectingEntity[i].getMutableComponent(SeekBar);
           if (this.controllers[i].pinched) {
-            this.controllers[i].attached = true;
-            this.controllers[i].paused = true;
-            seekbar.prevState = seekbar.currState;
-            seekbar.currState = "pressed";
-            seekbar.intersect = this.controllers[i].controller.position.x;
+            if (this.controllers[i].attached == false) {
+              this.controllers[i].attached = true;
+              this.controllers[i].paused = true;
+              seekbar.prevState = seekbar.currState;
+              seekbar.currState = "pressed";
+              seekbar.bar.updateMatrixWorld();
+              seekbar.bar.geometry.computeBoundingBox();
+            }
+            const box = seekbar.bar.geometry.boundingBox.clone();
+            box
+              .expandByVector(new Vector3(100, 100, 0.1))
+              .applyMatrix4(seekbar.bar.matrixWorld);
+            const point = new Vector3();
+            const clampedPoint = new Vector3();
+
+            if (this.controllers[i].raycaster.ray.intersectBox(box, point)) {
+              seekbar.bar.geometry.boundingBox.clampPoint(point, clampedPoint);
+              seekbar.intersect = clampedPoint;
+            }
           } else if (this.controllers[i].attached) {
             this.controllers[i].attached = false;
             this.controllers[i].paused = false;
