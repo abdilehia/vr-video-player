@@ -6,7 +6,11 @@ import "./menu.css";
 // GUI imports
 import { VRButton } from "three/addons/webxr/VRButton.js";
 import { GUI } from "three/addons/libs/lil-gui.module.min.js";
-import { HTMLMesh, InteractiveGroup } from "three/examples/jsm/Addons.js";
+import {
+  HTMLMesh,
+  InteractiveGroup,
+  OBJLoader,
+} from "three/examples/jsm/Addons.js";
 
 // Input imports
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -62,7 +66,7 @@ const clock = new THREE.Clock();
 //#endregion
 
 const videoFetch = await fetch("/videos");
-let page = 1;
+let page = 2;
 const pageCount = 18;
 const result = await videoFetch.json();
 const videos = result
@@ -642,6 +646,7 @@ function initControllers() {
   hand1 = renderer.xr.getHand(0);
   hand1.add(new OculusHandModel(hand1));
   handPointer1 = new OculusHandPointerModel(hand1, controller1);
+  console.log(hand1);
   hand1.add(handPointer1);
 
   scene.add(hand1);
@@ -712,8 +717,63 @@ function initLeftEye_old(texture) {
   mesh.layers.set(1); // display in left eye only
   scene.add(mesh);
 }
-
+const bruh = 0.1; // power
+const breh = 50; // z position
+const brah = 100; // scale
 function initLeftEye(texture) {
+  // const material = new THREE.ShaderMaterial({
+  //   uniforms: {
+  //     texture1: { value: texture },
+  //     ratio: { value: ratio },
+  //     power: { value: bruh },
+  //   },
+  //   vertexShader: `
+  //       varying vec2 vUv;
+  //       void main() {
+  //           vUv = uv;
+  //           gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+  //       }
+  //       `,
+  //   fragmentShader: `
+  //    varying vec2 vUv;
+  //    uniform float ratio;
+  //    uniform float power;
+  //    uniform sampler2D texture1;
+
+  //   void main() {
+  //     float b;
+  //     vec2 center;
+  //     vec2 uv;
+
+  //     center = vec2(0.5, 0.5);
+  //     if(ratio > 1.0) {
+  //       b = center.x; // Video wider than it is tall
+  //     }
+  //     else {
+  //       b = center.y; // Video taller than it is wide
+  //     }
+  //     uv = center  + normalize(vUv - center) * atan(distance(center, vUv) * -power * 10.0) * b / atan(-power * b * 10.0);
+  //     gl_FragColor = texture2D(texture1, uv);
+  //   }
+  // `,
+  // });
+  // const objLoader = new OBJLoader();
+  // objLoader.load("/assets/screen.obj", (root) => {
+  //   console.log(root);
+  //   root.name = "leftEye";
+  //   root.layers.set(1); // display in left eye only
+  //   const plane = root.children.find((child) => {
+  //     child.layers.set(1); // display in left eye only
+  //     return child.name == "Plane";
+  //   });
+  //   // plane.material = new THREE.MeshBasicMaterial({ map: texture });
+  //   plane.material = material;
+  //   plane.position.z = breh;
+  //   plane.scale.x = brah;
+  //   plane.scale.y = brah;
+  //   plane.scale.z = brah;
+  //   scene.add(root);
+  // });
   const geometry = new THREE.SphereGeometry(3, 60, 40);
   updateUVs(geometry, true, ratio);
   const material = new THREE.ShaderMaterial({
@@ -730,7 +790,7 @@ function initLeftEye(texture) {
     fragmentShader: `
      varying vec2 vUv;
      uniform sampler2D texture1;
-    
+
     void main() {
       if(vUv.x < 0.0 || vUv.x > 0.5 || vUv.y < 0.0 || vUv.y > 1.0) {
         discard;
@@ -752,12 +812,64 @@ function initLeftEye(texture) {
 }
 
 function initRightEye(texture) {
+  // const material = new THREE.ShaderMaterial({
+  //   uniforms: {
+  //     texture1: { value: texture },
+  //     ratio: { value: ratio },
+  //     power: { value: bruh },
+  //   },
+  //   vertexShader: `
+  //       varying vec2 vUv;
+  //       void main() {
+  //           vUv = uv;
+  //           gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+  //       }
+  //       `,
+  //   fragmentShader: `
+  //    varying vec2 vUv;
+  //    uniform float ratio;
+  //    uniform float power;
+  //    uniform sampler2D texture1;
+
+  //   void main() {
+  //     float b;
+  //     vec2 center;
+  //     vec2 uv;
+
+  //     center = vec2(0.5, 0.5);
+  //     if(ratio > 1.0) {
+  //       b = center.x; // Video wider than it is tall
+  //     }
+  //     else {
+  //       b = center.y; // Video taller than it is wide
+  //     }
+  //     uv = center  + normalize(vUv - center) * atan(distance(center, vUv) * -power * 10.0) * b / atan(-power * b * 10.0);
+  //     gl_FragColor = texture2D(texture1, uv);
+  //   }
+  // `,
+  // });
+  // const objLoader = new OBJLoader();
+
+  // objLoader.load("/assets/screen2.obj", (root) => {
+  //   console.log(root);
+  //   root.name = "rightEye";
+  //   root.layers.set(2); // display in left eye only
+  //   const plane = root.children.find((child) => {
+  //     child.layers.set(2); // display in left eye only
+  //     return child.name == "Plane";
+  //   });
+  //   // plane.material = new THREE.MeshBasicMaterial({ map: texture });
+  //   plane.material = material;
+  //   plane.position.z = breh;
+  //   plane.scale.x = brah;
+  //   plane.scale.y = brah;
+  //   plane.scale.z = brah;
+  //   scene.add(root);
+  // });
+
   const geometry = new THREE.SphereGeometry(3, 60, 40);
   updateUVs(geometry, false, ratio);
-  // const material = new THREE.MeshBasicMaterial({
-  //   map: texture,
-  //   side: THREE.BackSide,
-  // });
+
   const material = new THREE.ShaderMaterial({
     uniforms: {
       texture1: { value: texture },
@@ -772,7 +884,7 @@ function initRightEye(texture) {
     fragmentShader: `
      varying vec2 vUv;
      uniform sampler2D texture1;
-    
+
     void main() {
       if(vUv.x < 0.5 || vUv.x > 1.0 || vUv.y < 0.0 || vUv.y > 1.0) {
         discard;
