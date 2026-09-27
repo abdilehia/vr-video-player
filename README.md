@@ -1,50 +1,5 @@
-# React + TypeScript + Vite
+Very basic WebXR video player made in Three.js to handle different aspect ratios with more flexibility. This was my first usage of Three.js so I relied heavily on the examples they give as reference and extended it with the features I wanted. Features include basic playback features, controller interactions, a simple video browser (with support for thumbnails; can generate them using ffmpeg) and, of course, WebXR support. The desktop experience is non-existent and this was made a long while back so there is basically no reason to actually use this. In fact, I am pretty sure you would need to generate your own security certificates to use HTTPS as the method of retrieving and playing media does not work over normal HTTP so, if you needed more of a reason not to use this, there you go.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Instructions are basic: set the path with your videos using the VID_DIR_PATH in server.js, generate your own self-signed security certificates and save them as "localhost.pem" and "localhost-key.pem" in the base directory (next to index.html), and then you should be able to run it by doing "node server.js". 
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+I made this using Vite + Express thinking I would make use of the server-side rendering features but realistically I could have simplified the setup way more and been fine.
