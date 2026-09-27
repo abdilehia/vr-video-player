@@ -91,5 +91,5 @@ const seekHandleMaterial = new THREE.ShaderMaterial({
 const seekHandleMesh = new THREE.Mesh(seekHandleGeometry, seekHandleMaterial);
 
 seekBarMesh.add(seekHandleMesh);
-seekHandleMesh.position.set(0.0, 0.0, 0.05);
+seekHandleMesh.position.set(0.0, 0.0, 0.001);
 export { seekBarMesh, seekBarMaterial, seekHandleMesh };

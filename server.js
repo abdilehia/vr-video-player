@@ -34,6 +34,7 @@ I also need the UI to still be there.
 */
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const VID_DIR_PATH = "" // Obviously put your path here
 
 // Load your certificate and key
 const options = {
@@ -72,7 +73,7 @@ async function createServer() {
   app.use("/p/:preview", cors(), (req, res) => {
     console.log(req.originalUrl.replace("%20", " "));
     let file = fs.readFileSync(
-      `D:/Videos/${req.originalUrl.slice(2).replace("%20", " ")}`
+      VID_DIR_PATH + req.originalUrl.slice(2).replace("%20", " ")
     );
     res.end(file);
   });
@@ -80,7 +81,7 @@ async function createServer() {
   app.use("/videos", cors(), async (req, res, next) => {
     const paths = await globby("**.mp4", {
       absolute: false,
-      cwd: "D:/Videos/",
+      cwd: VID_DIR_PATH,
       stats: true,
       onlyFiles: true,
     });
@@ -88,7 +89,7 @@ async function createServer() {
   });
   app.use("/:video", cors(), (req, res) => {
     console.log(req.originalUrl.replace("%20", " "));
-    let file = `D:/Videos/${req.originalUrl.replace("%20", " ")}`;
+    let file = VID_DIR_PATH + req.originalUrl.replace("%20", " ");
     fs.stat(file, function (err, stats) {
       if (err) {
         if (err.code === "ENOENT") {
@@ -167,7 +168,7 @@ async function createServer() {
   });
 
   //app.listen(5173);
-  https.createServer(options, app).listen(5173);
+  https.createServer(options, app).listen(3001);
 }
 
 createServer();
